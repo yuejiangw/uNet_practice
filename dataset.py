@@ -36,6 +36,7 @@ class dataAugmentation(object):
         self.aug_train_path = aug_train_path
         self.aut_label_path = aug_label_path
         self.slices = len(self.train_imgs)
+        # 有关数据增强，请参考：https://blog.csdn.net/Harrison509/article/details/88855580
         self.datagen = ImageDataGenerator(
             rotation_range=0.2,
             width_shift_range=0.05,
@@ -85,4 +86,16 @@ class dataAugmentation(object):
         """
         对一张图片进行增强，默认一张图片生成30张
         """
+        datagen = self.datagen
+        i = 0
+        for batch in datagen.flow(
+                img,
+                batch_size=batch_size,
+                save_to_dir=save_to_dir,
+                save_prefix=save_prefix,
+                save_format=save_format
+            ):
+            i += 1
+            if i > imgnum:
+                break
         
