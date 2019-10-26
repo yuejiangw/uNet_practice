@@ -34,9 +34,9 @@ class dataAugmentation(object):
         self.img_type = img_type
         self.aug_merge_path = aug_merge_path
         self.aug_train_path = aug_train_path
-        self.aut_label_path = aug_label_path
+        self.aug_label_path = aug_label_path
         self.slices = len(self.train_imgs)
-        # 有关数据增强，请参考：https://blog.csdn.net/Harrison509/article/details/88855580
+        # 有关数据增强，请参考：https://keras.io/zh/preprocessing/image/
         self.datagen = ImageDataGenerator(
             rotation_range=0.2,
             width_shift_range=0.05,
@@ -77,6 +77,7 @@ class dataAugmentation(object):
             # 
             img = x_t
             img = img.reshape((1,) + img.shape)
+            # 每一张图像都有自己独立的一个文件夹存储增强后的图片
             savedir = path_aug_merge + "/" + str(i)
             if not os.path.lexists(savedir):
                 os.mkdir(savedir)
@@ -88,6 +89,7 @@ class dataAugmentation(object):
         """
         datagen = self.datagen
         i = 0
+        # 参考：https://blog.csdn.net/mieleizhi0522/article/details/82191331
         for batch in datagen.flow(
                 img,
                 batch_size=batch_size,
@@ -98,4 +100,36 @@ class dataAugmentation(object):
             i += 1
             if i > imgnum:
                 break
-        
+    
+    def splitMerge(self):
+        """
+        将合在一起的图片分开
+        """
+        path_merge = self.aug_merge_path
+        path_train = self.aug_train_path
+        path_label = self.aug_label_path
+
+        for i in range(self.slices):
+            path = path_merge + "/" + str(i)
+            train_imgs = glob.glob(path + "/*." + self.img_type)
+            savedir = path_train + "/" + str(i)
+            if not os.path.lexists(savedir):
+                os.mkdir(savedir)
+            savedir = path_label + "/" + str(i)
+            if not os.path.lexists(savedir):
+                os.mkdir(savedir)
+            
+            for imgname in train_imgs:
+                midname = imgname[imgname.rindex("/")+1: imgname.rindex("."+self.img_type)]
+                img = cv2.imread(imgname)
+                # cv2 读取图片是BGR格式，要转换为RGB
+                # 参考：https://www.jianshu.com/p/0e462b4c7a93
+                img_train = img[:,:,2]
+                img_label = img[:,:,0]
+                cv2.imwrite(path_train + "/" + str(i) + "/" + midname + "_train" + "." + self.img_type, img_train)
+                cv2.imwrite(path_label + "/" + str(i) + "/" + midname + "_label" + "." + self.img_type, img_label)
+
+    def splitTransform(self):
+        """
+        将透视变换后的图像拆分
+        """
