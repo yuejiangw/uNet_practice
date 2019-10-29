@@ -160,3 +160,30 @@ class dataProcess(object):
         self.npy_path = npy_path
         self.img_type = img_type
     
+    # 创建训练数据
+    def create_train_data(self):
+        i = 0
+        print('-' * 30)
+        print("Creating train images...")
+        print('-' * 30)
+        imgs = glob.glob(self.data_path + '/.*' + self.img_type)
+        print('The number of training images is: ' + len(imgs))
+
+        img_data = np.array((len(imgs), self.out_rows, self.out_cols, 1), dtype=np.uint8)
+        img_label = np.array((len(imgs), self.out_rows, self.out_cols, 1), dtype=np.uint8)
+        for img_name in imgs:
+            midname = img_name[img_name.rindex("/") + 1:]
+            # 读取图像和对应标签，grayscale=True代表以灰度图像形式读取
+            # load_img返回一个Image对象，需要手动转换为矩阵
+            img = load_img(self.data_path + "/" + midname, grayscale=True)      
+            label = load_img(self.label_path + "/" + midname, grayscale=True)
+            img = img_to_array(img)
+            label = img_to_array(label)
+            if i % 10 == 0:
+                print("Done: {0}/{1} images".format(i, len(imgs)))
+            i += 1
+        print("Loading done, start saving...")
+        np.save(self.npy_path + '/imgs_train.npy', img_data)
+        np.save(self.npy_path + './imgs_label.npy', img_label)
+        print("Saving to npy files done")
+    
