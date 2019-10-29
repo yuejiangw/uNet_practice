@@ -179,11 +179,82 @@ class dataProcess(object):
             label = load_img(self.label_path + "/" + midname, grayscale=True)
             img = img_to_array(img)
             label = img_to_array(label)
+            img_data[i] = img
+            img_label[i] = label
             if i % 10 == 0:
                 print("Done: {0}/{1} images".format(i, len(imgs)))
             i += 1
-        print("Loading done, start saving...")
+        print("Loading train images done, start saving...")
         np.save(self.npy_path + '/imgs_train.npy', img_data)
+        print('Saving to imgs_train.npy files done')
         np.save(self.npy_path + './imgs_label.npy', img_label)
-        print("Saving to npy files done")
+        print("Saving to imgs_label.npy files done")
     
+    # 创建测试数据
+    def create_test_data(self):
+        i = 0
+        print('-' * 30)
+        print("Creating test images...")
+        print('-' * 30)
+        imgs = glob.glob(self.test_path + '/*.' + self.img_type)
+        print('The number of test images is: ' + len(imgs))
+
+        img_data = np.array((len(imgs), self.out_rows, self.out_cols, 1), dtype=np.uint8)
+        for img_name in imgs:
+            midname = img_name[img_name.rindex("/") + 1:]
+            img = load_img(self.test_path + '/' + midname, grayscale=True)
+            img = img_to_array(img)
+            img_data[i] = img
+            i += 1
+        print('Loading test images done, start saving...')
+        np.save(self.npy_path + '/imgs_test.npy', img_data)
+        print('Saving to imgs_test.npy files done')
+    
+    # 加载训练图片与mask
+    def load_train_data(self):
+        print("-" * 30)
+        print("Load train images and labels...")
+        print("-" * 30)
+        imgs_train = np.load(self.npy_path + '/imgs_train.npy')
+        imgs_label = np.load(self.npy_path + '/imgs_label.npy')
+        # 将像素值归一化处理，参考：https://blog.csdn.net/qq_38784454/article/details/80449445
+        imgs_train = imgs_train.astype('float32')
+        imgs_label = imgs_label.astype('float32')
+        imgs_train /= 255
+        mean = imgs_train.mean(axis=0)
+        imgs_train -= mean
+        # 将mask进行阈值处理，认为输出概率大于0.5的为1，否则为0
+        imgs_label /= 255
+        imgs_label[imgs_label > 0.5] = 1
+        imgs_label[imgs_label <= 0.5] = 0
+        
+        return imgs_train, imgs_label
+
+    # 加载测试图片
+    def load_test_data(self):
+        print('-' * 30)
+        print("Load test images...") 
+        print('-' * 30)
+        imgs_test = np.load(self.npy_path + '/imgs_test.npy')
+        # 归一化处理
+        imgs_test = imgs_test.astype('float32')
+        imgs_test /= 255
+        mean = imgs_test.mean(axis=0)
+        imgs_test -= mean
+        
+        return imgs_test
+
+if __name__ == "__main__":
+    # 数据增强
+    aug = dataAugmentation()
+    aug.Augmentation()
+    aug.splitMerge()
+    aug.splitTransform()
+
+    # 数据处理
+    mydata = dataProcess(512, 512)
+    mydata.create_train_data()
+    mydata.create_test_data()
+
+    imgs_train, imgs_label = mydata.load_train_data()
+    print(imgs_train.shape, imgs_label.shape)
