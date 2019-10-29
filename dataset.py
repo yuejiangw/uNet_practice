@@ -133,3 +133,30 @@ class dataAugmentation(object):
         """
         将透视变换后的图像拆分
         """
+        path_merge = './images/deform/de_merge'
+        path_train = './images/deform/de_train/'
+        path_label = './images/deform/de_label/'
+
+        train_imgs = glob.glob(path_merge + '/*.' + self.img_type)
+        for imgname in train_imgs:
+            midname = imgname[imgname.rindex("/") + 1 : imgname.rindex("." + self.img_type)]
+            img = cv2.imread(imgname)
+            img_train = img[:,:,2]
+            img_label = img[:,:,0]
+            cv2.write(path_train + midname + '.' + self.img_type, img_train)
+            cv2.write(path_label + midname + '.' + self.img_type, img_label)
+
+class dataProcess(object):
+    '''
+    此类用于数据处理
+    '''
+    def __init__(self, out_rows, out_cols, data_path='./images/deform/de_train',
+        label_path='./images/deform/de_label', test_path='./images/test', npy_path='./npy_data', img_type='tif'):
+        self.out_rows = out_rows
+        self.out_cols = out_cols
+        self.data_path = data_path
+        self.label_path = label_path
+        self.test_path = test_path
+        self.npy_path = npy_path
+        self.img_type = img_type
+    
