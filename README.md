@@ -6,5 +6,5 @@ The dataset comes from an ISBI challange, which is also included in the reposito
 
 The source code referenced other people's blogs, and I will try my best to give detailed annotation of the codes to make sure that a novice can understand the codes easily.
 
-It is not easy to learn deep learning by self-study. I hope my code will help you on your way to AI.
+It is not easy to learn deep learning through self-study. I hope my code will help you on your way to AI.
   

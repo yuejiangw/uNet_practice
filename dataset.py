@@ -82,10 +82,16 @@ class dataAugmentation(object):
             if not os.path.lexists(savedir):
                 os.mkdir(savedir)
             self.doAugmentate(img, savedir, str(i))
-
+    
+    # 对一张图片进行增强，默认一张图片生成30张
     def doAugmentate(self, img, save_to_dir, save_prefix, batch_size=1, save_format='tif', imgnum=30):
         """
-        对一张图片进行增强，默认一张图片生成30张
+        img: 被增强的图片
+        save_to_dir: 增强图片的保存路径
+        save_prefix: 保存增强图片的名字前缀
+        batch_size: 批大小
+        save_format: 保存格式
+        imgnum: 单张图片增强的数量
         """
         datagen = self.datagen
         i = 0
@@ -245,8 +251,17 @@ class dataProcess(object):
         return imgs_test
 
 if __name__ == "__main__":
+
+    # 图像路径
+    train_path = './images/train/images'
+    label_path = './images/train/label'
+    merge_path = './images/merge'
+    aug_merge_path = './images/augmentation/aug_merge'
+    aug_train_path = './images/augmentation/aug_train'
+    aug_label_path = './images/augmentation/aug_label'
+
     # 数据增强
-    aug = dataAugmentation()
+    aug = dataAugmentation(train_path, label_path, merge_path, aug_train_path, aug_train_path, aug_label_path)
     aug.Augmentation()
     aug.splitMerge()
     aug.splitTransform()
